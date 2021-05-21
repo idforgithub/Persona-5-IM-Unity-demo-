@@ -1,65 +1,41 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.UI;
 using System.IO;
 using System;
 
-public class Spawnner : MonoBehaviour
-{
+public class Spawnner : MonoBehaviour {
 
     public GameObject item;
     public RectTransform panel;
     public int totalSpawnner = 10;
 
-    void Start()
-    {
+    void Awake() {
         LoadData();
+        DestroyImmediate(item);
 
-        Sprite testSprite = Resources.Load<Sprite>("Persona 5 IM/icons/futaba");
+        print(Application.persistentDataPath);
+        Sprite testSprite = AssetDatabase.LoadAssetAtPath("Assets/Persona 5 IM/icons/futaba.png", typeof(Sprite)) as Sprite;
         print(testSprite);
-
-
-        /*
-        panel.sizeDelta = new Vector2(720, 160*totalSpawnner);
-        for(int i=0; i<totalSpawnner; i++){
-            int rand = UnityEngine.Random.Range(0, 15);
-            float x = 720f;
-            if(rand < 5 && rand > 0){
-                x = 680f;
-            }else if(rand < 10 && rand > 6){
-                x = 770f;
-            }
-            item.GetComponent<RectTransform>().sizeDelta = new Vector2(x, 160f);
-            Instantiate(item, item.transform.parent);
-        }
-        */
-        Destroy(item);
     }
 
     private void LoadData(){
-        //var directoryPath = Application.persistentDataPath + "/Assets/";
-        string loadAssets = Directory.GetCurrentDirectory() + "\\Assets\\";
+        string projectPath = Application.persistentDataPath + "Assets/";
+        if(Application.platform == RuntimePlatform.Android){ // <<-- FOR ANDROID
+            projectPath = Application.persistentDataPath + "/Assets/";
+        }
 
-        User[] listUser = LoadDummy(loadAssets);
-
-        /*
-        string resourcesF = @"Persona 5 IM/icons/" + System.IO.Path.AltDirectorySeparatorChar + "futaba";
-
-        Sprite test = Resources.Load(@"Persona 5 IM/icons/" + System.IO.Path.AltDirectorySeparatorChar + "futaba") as Sprite;
-        print(loadAssets + "Persona 5 IM\\icons\\futaba.png");
-        print(test.texture);
-        */
-
+        //string iconDummy = projectPath + "Persona 5 IM/icons/";
+        string iconDummy = "Assets/Persona 5 IM/icons/";
+        User[] listUser = LoadDummy(iconDummy);
         panel.sizeDelta = new Vector2(720, 160*listUser.Length);
-
         foreach (User user in listUser){
             GameObject newItem = Instantiate(item, item.transform.parent);
+            newItem = renameItem(newItem, user);
             newItem = setupInterfaceChat(newItem, user);
-
             newItem.GetComponent<RectTransform>().sizeDelta = new Vector2(randomX(), 160f);
-            newItem.name = renameItem(newItem, user);
-            print(newItem.name);
         }
     }
 
@@ -68,12 +44,9 @@ public class Spawnner : MonoBehaviour
         chatItem.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         
         // image user
-        Image newUserImage = chatItem.transform.GetChild(0).GetChild(3).GetChild(0).GetComponent<Image>();
-        print("Image Before: "+newUserImage.sprite);
-        newUserImage.overrideSprite = Resources.Load<Sprite>(user.imgUser);
-        print("Image After: "+newUserImage.sprite);
-        chatItem.transform.GetChild(0).GetChild(3).GetChild(0).GetComponent<Image>().overrideSprite = Resources.Load<Sprite>(user.imgUser);
-        
+        chatItem.transform.GetChild(0).GetChild(3).GetChild(0).GetComponent<Image>().sprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
+        chatItem.transform.GetChild(0).GetChild(3).GetChild(0).GetComponent<Image>().SetNativeSize();
+
         // color user
         chatItem.transform.GetChild(0).GetChild(3).GetComponent<Image>().color = user.colorUser;
 
@@ -89,8 +62,9 @@ public class Spawnner : MonoBehaviour
         return chatItem;
     }
 
-    private string renameItem(GameObject newItem, User user){
-        return newItem.name.Replace("item(Clone)", char.ToUpper(user.nameUser[0]) + user.nameUser.Substring(1)).Trim();
+    private GameObject renameItem(GameObject newItem, User user){
+        newItem.name = newItem.name.Replace("item(Clone)", char.ToUpper(user.nameUser[0]) + user.nameUser.Substring(1)).Trim();
+        return newItem;
     }
     private float randomX(){
         int rand = UnityEngine.Random.Range(0, 15);
@@ -103,12 +77,10 @@ public class Spawnner : MonoBehaviour
         return x;
     }
 
-    private User[] LoadDummy(string assetsPath){
-        string iconPath = assetsPath + "Persona 5 IM/icons/";
-
+    private User[] LoadDummy(string iconPath){
         List<User> users = new List<User>();
-        User akechi = new User(1, "Akechi", new DateTime(2021, 12, 31, 5, 10, 20) , iconPath + "akechi", Color.cyan);
-        User futaba = new User(1, "Futaba", new DateTime(2021, 10, 31, 5, 10, 20), iconPath + "futaba", Color.green);
+        User akechi = new User(1, "Akechi", new DateTime(2021, 12, 31, 5, 10, 20) , iconPath + "akechi.png", Color.cyan);
+        User futaba = new User(1, "Futaba", new DateTime(2021, 10, 31, 5, 10, 20), iconPath + "futaba.png", Color.green);
         User group = new User(1, "Group",   new DateTime(2020, 10, 31, 5, 10, 20), iconPath + "group.png", Color.grey);
         User hifumi = new User(1, "Hifumi", new DateTime(2020, 10, 31, 5, 10, 20), iconPath + "hifumi.png", Color.magenta);
         User kawakami = new User(1, "Kawakami",new DateTime(2019, 7, 31, 5, 10, 20), iconPath + "kawakami.png", Color.red);
