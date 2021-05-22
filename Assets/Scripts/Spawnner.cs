@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
-using UnityEngine.UI;
 using System.IO;
 using System;
 using System.Linq;
@@ -49,53 +46,16 @@ public class Spawnner : MonoBehaviour {
 
         panel.sizeDelta = new Vector2(720, 160*listUser.Length);
 
-        IEnumerable<User> orderListUser = listUser.OrderByDescending(order => order.listChat.LastOrDefault().dateMessage.TimeOfDay);
-        foreach (User user in orderListUser){
+        IOrderedEnumerable<User> listUserOrdered = listUser.OrderByDescending(order => order.listChat.LastOrDefault().dateMessage.TimeOfDay);
+        foreach (User e in listUserOrdered){
             GameObject newItem = Instantiate(item, item.transform.parent);
-            newItem = renameItem(newItem, user);
-            newItem = setupInterfaceChat(newItem, user);
+            newItem.transform.GetChild(0).GetComponent<UserLayout>().BuildLayout(e);
+            newItem = renameItem(newItem, e);
             newItem.GetComponent<RectTransform>().sizeDelta = new Vector2(randomX(), 160f);
         }
     }
 
-    private GameObject setupInterfaceChat(GameObject chatItem, User user){
-        // message -- dummy -- 
-        string lastIndexMsg = user.listChat.LastOrDefault().message;
-        chatItem.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = lastIndexMsg.Length > 18 ? lastIndexMsg.Substring(0, 18) + "..." : lastIndexMsg;
-        
-        // message event
-        if(lastIndexMsg.Last() == '?'){
-            chatItem = setupEventChat(chatItem, "question_mark");
-        }else if(lastIndexMsg.Last() == '!'){
-            chatItem = setupEventChat(chatItem, "exclamation_mark");
-        }
-
-        // image user
-        chatItem.transform.GetChild(0).GetChild(4).GetChild(0).GetComponent<Image>().sprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
-        chatItem.transform.GetChild(0).GetChild(4).GetChild(0).GetComponent<Image>().SetNativeSize();
-
-        // color user
-        chatItem.transform.GetChild(0).GetChild(4).GetComponent<Image>().color = user.colorUser;
-
-        // user date
-        // month
-        chatItem.transform.GetChild(0).GetChild(5).GetChild(0).GetComponent<Text>().text = user.listChat.LastOrDefault().dateMessage.Month.ToString().PadLeft(2, '0');
-        // date
-        chatItem.transform.GetChild(0).GetChild(5).GetChild(1).GetComponent<Text>().text = user.listChat.LastOrDefault().dateMessage.Day.ToString().PadLeft(2, '0');
-        // day
-        string day = user.listChat.LastOrDefault().dateMessage.Date.ToString("ddd");
-        chatItem.transform.GetChild(0).GetChild(5).GetChild(2).GetComponent<Text>().text = day.Substring(0, day.Length-1);
-
-        return chatItem;
-    }
-
 #region HELPER INTERFACE
-    private GameObject setupEventChat(GameObject chat, string eventName){
-        chat.transform.GetChild(0).GetChild(2).GetComponent<Image>().color = Color.white;
-        chat.transform.GetChild(0).GetChild(2).GetComponent<Image>().sprite = AssetDatabase.LoadAssetAtPath($"Assets/Persona 5 IM/{eventName}.png", typeof(Sprite)) as Sprite;
-        return chat;
-    }
-
     private GameObject renameItem(GameObject newItem, User user){
         newItem.name = newItem.name.Replace("item(Clone)", char.ToUpper(user.nameUser[0]) + user.nameUser.Substring(1)).Trim();
         return newItem;
@@ -124,6 +84,12 @@ public class Spawnner : MonoBehaviour {
         chatsFutaba.Add( new Chat("Ren?!", new DateTime(2021, 7, 31, 7, 10, 20)) );
         chatsFutaba.Add( new Chat("Moshi-moshi?!", new DateTime(2021, 7, 31, 7, 10, 20)) );
         chatsFutaba.Add( new Chat("Oiiiii!!!!!!!!", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        chatsFutaba.Add( new Chat("As one of the crew, we’ve got a special gift for you.", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        chatsFutaba.Add( new Chat("Like what you see? If fashion is your thing, check out our Instagram as well!", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        chatsFutaba.Add( new Chat("Hey Joker, I saw your post. I’d love to feature it on my feed, would that be okay?", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        chatsFutaba.Add( new Chat("Monitor your top followers and send them a message.", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        chatsFutaba.Add( new Chat("As a reward for being one of our top followers", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        
 
         List<Chat> chatsHifumi = new List<Chat>();
         chatsHifumi.Add( new Chat("Hello", new DateTime(2021, 7, 31, 6, 10, 20)) );

@@ -7,14 +7,21 @@ public class AppsManager : MonoBehaviour
 {
     public GameObject canvasListChat;
     public GameObject canvasChat;
-    public GameObject panelListChat;
+    public GameObject panelListUser;
     public Image preventMultiClick;
 
-#region BOX REVERSE ATTRIBUTE
+#region ANIMATION --- BOX REVERSE ATTRIBUTE
     public GameObject boxImageReverseTransparent;
     public Vector2 sizeDeltaBoxAnim;
     public Vector3 localPositionBoxAnim;
 #endregion
+
+    public User userPasser;
+
+    void Start(){
+        canvasListChat.SetActive(true);
+        canvasChat.SetActive(false);
+    }
 
     void Update(){
         // Set Activate Panel List Chat when press backbutton in Layout Chat Activate
@@ -22,11 +29,15 @@ public class AppsManager : MonoBehaviour
             if (Input.GetKey(KeyCode.Escape)) {
                 PreventMultiClick(false);
                 PlayBoxAnimationReverse();
-                ActiveCanvas(true, panelListChat, .5f);
+                ActiveCanvas(true, panelListUser, .5f);
                 DeactivateCanvasChat(0);
                 ActivateCanvasListChat(.5f);
             }
         }
+    }
+
+    public void ShowCanvasChat(User user){
+        GetComponent<SpawnerChat>().LoadChat(user);
     }
 
     public void PreventMultiClick(bool set){
