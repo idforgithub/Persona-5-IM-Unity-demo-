@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,17 +7,20 @@ public class AppsManager : MonoBehaviour
 {
     public GameObject canvasListChat;
     public GameObject canvasChat;
-
     public GameObject panelListChat;
+    public Image preventMultiClick;
 
+#region BOX REVERSE ATTRIBUTE
     public GameObject boxImageReverseTransparent;
     public Vector2 sizeDeltaBoxAnim;
     public Vector3 localPositionBoxAnim;
+#endregion
 
     void Update(){
         // Set Activate Panel List Chat when press backbutton in Layout Chat Activate
         if(canvasChat.activeInHierarchy == true){
             if (Input.GetKey(KeyCode.Escape)) {
+                PreventMultiClick(false);
                 PlayBoxAnimationReverse();
                 ActiveCanvas(true, panelListChat, .5f);
                 DeactivateCanvasChat(0);
@@ -25,6 +29,9 @@ public class AppsManager : MonoBehaviour
         }
     }
 
+    public void PreventMultiClick(bool set){
+        preventMultiClick.raycastTarget = set;
+    }
 
     public void DeactivateCanvasListChat(float time){
         ActiveCanvas(false, canvasListChat, time);
