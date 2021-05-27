@@ -35,7 +35,7 @@ public class UserLayout : MonoBehaviour {
         }
 
         // image user
-        imgUser.sprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
+        imgUser.overrideSprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
         imgUser.SetNativeSize();
 
         // color user

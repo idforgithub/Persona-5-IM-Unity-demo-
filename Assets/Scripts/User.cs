@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
-using System.Linq;
 
 [System.Serializable]
 public class User {
@@ -15,6 +13,9 @@ public class User {
     public Color colorUser;
 
     public List<Chat> listChat;
+
+    public User(){
+    }
 
     public User(int id, string name, string img, Color color, List<Chat> chats){
         this.idUser = id;

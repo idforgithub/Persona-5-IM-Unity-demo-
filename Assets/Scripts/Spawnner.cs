@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 using System.IO;
 using System;
 using System.Linq;
@@ -17,8 +18,8 @@ public class Spawnner : MonoBehaviour {
     public RectTransform panel;
 
     void Awake() {
+        item.SetActive(false);
         LoadData();
-        Destroy(item);
     }
 
     private void LoadData(){
@@ -44,28 +45,49 @@ public class Spawnner : MonoBehaviour {
         string iconDummy = ASSETS + Path.DirectorySeparatorChar + persona5Icons;
         User[] listUser = LoadDummy(iconDummy);
 
-        panel.sizeDelta = new Vector2(720, 160*listUser.Length);
-
         IOrderedEnumerable<User> listUserOrdered = listUser.OrderByDescending(order => order.listChat.LastOrDefault().dateMessage.TimeOfDay);
-        foreach (User e in listUserOrdered){
+        
+        StartCoroutine("Spawner", listUserOrdered);
+    }
+
+    private IEnumerator Spawner(IOrderedEnumerable<User> listUserOrdered){
+        
+        float sizeDeltaX = item.GetComponent<RectTransform>().sizeDelta.x;
+        float sizeDeltaY = item.GetComponent<RectTransform>().sizeDelta.y;
+        
+        int i = 1; foreach (User e in listUserOrdered){
+            panel.sizeDelta = new Vector2(sizeDeltaX, sizeDeltaY * i);
             GameObject newItem = Instantiate(item, item.transform.parent);
-            newItem.transform.GetChild(0).GetComponent<UserLayout>().BuildLayout(e);
+            newItem.SetActive(true);
             newItem = renameItem(newItem, e);
-            newItem.GetComponent<RectTransform>().sizeDelta = new Vector2(randomX(), 160f);
+
+            int index = randomAnimationIndex(newItem.transform.GetChild(0).GetComponent<Animation>().GetClipCount());
+            newItem.transform.GetChild(0).GetComponent<Animation>().Play($"itemUser{randomAnimationIndex(index)}");
+            newItem.transform.GetChild(0).GetComponent<UserLayout>().BuildLayout(e);
+            
+            newItem.transform.GetChild(0).GetComponent<RectTransform>().sizeDelta = new Vector2(randomX(), 160f);
+            i++;
+            yield return new WaitForSeconds(.1f);
         }
     }
 
 #region HELPER INTERFACE
+
     private GameObject renameItem(GameObject newItem, User user){
         newItem.name = newItem.name.Replace("item(Clone)", char.ToUpper(user.nameUser[0]) + user.nameUser.Substring(1)).Trim();
         return newItem;
+    }
+
+    private int randomAnimationIndex(int totalAnimation){
+        int animIndex = UnityEngine.Random.Range(1, totalAnimation+1);
+        return animIndex;
     }
 
     private float randomX(){
         int rand = UnityEngine.Random.Range(0, 15);
         float x = 720f;
         if(rand < 5 && rand > 0){
-            x = 680f;
+            x = 690f;
         }else if(rand < 10 && rand > 6){
             x = 770f;
         }
@@ -93,6 +115,10 @@ public class Spawnner : MonoBehaviour {
 
         List<Chat> chatsHifumi = new List<Chat>();
         chatsHifumi.Add( new Chat("Hello", new DateTime(2021, 7, 31, 6, 10, 20)) );
+        chatsHifumi.Add( new Chat("Ren-san ?", new DateTime(2021, 7, 31, 6, 10, 20)) );
+        chatsHifumi.Add( new Chat("Amamiya-kun ?", new DateTime(2021, 7, 31, 6, 10, 20)) );
+        chatsHifumi.Add( new Chat("Shogi time ?", new DateTime(2021, 7, 31, 7, 21, 20)) );
+        chatsHifumi.Add( new Chat("Are you free ?", new DateTime(2021, 7, 31, 7, 21, 20)) );
         chatsHifumi.Add( new Chat("Come and play shogi with me ?", new DateTime(2021, 7, 31, 7, 21, 20)) );
 
         List<Chat> chatsKawakami = new List<Chat>();
@@ -100,9 +126,11 @@ public class Spawnner : MonoBehaviour {
         chatsKawakami.Add( new Chat("Maid Service ?", new DateTime(2021, 7, 31, 7, 21, 20)) );
 
         List<Chat> chatsTest = new List<Chat>();
-        chatsTest.Add( new Chat("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", new DateTime(2021, 7, 31, 7, 10, 20)) );
-        chatsTest.Add( new Chat("Message Last Index", new DateTime(2020, 9, 29, 3, 10, 20)) );
+        chatsTest.Add( new Chat("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", new DateTime(2020, 7, 31, 7, 10, 20)) );
+        chatsTest.Add( new Chat("Message Last Index", new DateTime(2021, 9, 29, 3, 10, 20)) );
         
+        User asd = new User();
+
         List<User> users = new List<User>();
         User akechi = new User(1, "Akechi", iconPath + "akechi.png", Color.cyan, chatsAkechi);
         User futaba = new User(2, "Futaba", iconPath + "futaba.png", Color.green, chatsFutaba);
