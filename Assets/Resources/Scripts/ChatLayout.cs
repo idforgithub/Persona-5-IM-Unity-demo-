@@ -26,7 +26,8 @@ public class ChatLayout : MonoBehaviour
         }
 
         // Image User
-        imgUser.sprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
+        //imgUser.sprite = Resources.Load<Sprite>(user.imgUser);
+        imgUser.overrideSprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
         imgUser.SetNativeSize();
 
         // color user
@@ -43,7 +44,8 @@ public class ChatLayout : MonoBehaviour
 
     private void setupEventChat(string eventName){
         eventMessage.color = Color.white;
-        eventMessage.sprite = AssetDatabase.LoadAssetAtPath($"Assets/Persona 5 IM/{eventName}.png", typeof(Sprite)) as Sprite;
+        //eventMessage.sprite = Resources.Load<Sprite>($"Assets/Persona 5 IM/{eventName}.png");
+        eventMessage.sprite = AssetDatabase.LoadAssetAtPath($"Assets/Resources/Persona 5 IM/{eventName}.png", typeof(Sprite)) as Sprite;
     }
 #endregion
 }

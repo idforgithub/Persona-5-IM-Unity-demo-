@@ -6,26 +6,14 @@ using System;
 using System.Linq;
 
 public class Spawnner : MonoBehaviour {
-
-    public static class FilePathApp {
-        public static String Windows { get { return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + ASSETS; } } 
-        public static String Android { get { return Application.persistentDataPath;} }
-    }
-
-    private const string ASSETS = "Assets";
-
     public GameObject item;
     public RectTransform panel;
 
-    void Awake() {
-        item.SetActive(false);
-        LoadData();
-    }
+    private float sizeDeltaX;
+    private float sizeDeltaY;
 
-    private void LoadData(){
-        string projectPath = Directory.GetCurrentDirectory() + ASSETS;
-        string persona5Icons = "Persona 5 IM/icons/";
 
+    private void testPath(){
         // DEBUG LINE ------------------------------------------------------------------------------------------------------
         /* 
         string windows = Path.Combine(FilePathApp.Windows, persona5Icons);
@@ -41,37 +29,55 @@ public class Spawnner : MonoBehaviour {
         Sprite testSprite = AssetDatabase.LoadAssetAtPath("Assets/Persona 5 IM/icons/futaba.png", typeof(Sprite)) as Sprite;
         print(testSprite);
         */
-
-        string iconDummy = ASSETS + Path.DirectorySeparatorChar + persona5Icons;
-        User[] listUser = LoadDummy(iconDummy);
-
-        IOrderedEnumerable<User> listUserOrdered = listUser.OrderByDescending(order => order.listChat.LastOrDefault().dateMessage.TimeOfDay);
-        
-        StartCoroutine("Spawner", listUserOrdered);
     }
 
-    private IEnumerator Spawner(IOrderedEnumerable<User> listUserOrdered){
+    public void LoadUser(){
+        item.SetActive(false);
+        this.sizeDeltaX = item.GetComponent<RectTransform>().sizeDelta.x;
+        this.sizeDeltaY = item.GetComponent<RectTransform>().sizeDelta.y;
+
+        string debugPathIcons = BuildPath(
+            new string[]{
+                "Assets",
+                "Resources",
+                "Persona 5 IM",
+                "icons"
+            }
+        );
+        User[] listUser = LoadDummy(debugPathIcons);
+
+        var listUserOrdered = listUser.OrderByDescending(order => order.listChat.LastOrDefault().dateMessage.TimeOfDay);
         
-        float sizeDeltaX = item.GetComponent<RectTransform>().sizeDelta.x;
-        float sizeDeltaY = item.GetComponent<RectTransform>().sizeDelta.y;
-        
-        int i = 1; foreach (User e in listUserOrdered){
-            panel.sizeDelta = new Vector2(sizeDeltaX, sizeDeltaY * i);
+        StartCoroutine("Spawner", listUserOrdered.ToArray<User>());
+    }
+
+    private IEnumerator Spawner(User[] listUserOrdered){
+        for (int i = 0; i < listUserOrdered.Length; i++){
+            panel.sizeDelta = new Vector2(sizeDeltaX, sizeDeltaY * (i+1));
             GameObject newItem = Instantiate(item, item.transform.parent);
             newItem.SetActive(true);
-            newItem = renameItem(newItem, e);
+            newItem = renameItem(newItem, listUserOrdered[i]);
 
             int index = randomAnimationIndex(newItem.transform.GetChild(0).GetComponent<Animation>().GetClipCount());
             newItem.transform.GetChild(0).GetComponent<Animation>().Play($"itemUser{randomAnimationIndex(index)}");
-            newItem.transform.GetChild(0).GetComponent<UserLayout>().BuildLayout(e);
-            
+            newItem.transform.GetChild(0).GetComponent<UserLayout>().BuildLayout(listUserOrdered[i]);
+
             newItem.transform.GetChild(0).GetComponent<RectTransform>().sizeDelta = new Vector2(randomX(), 160f);
-            i++;
             yield return new WaitForSeconds(.1f);
         }
     }
 
 #region HELPER INTERFACE
+    private static string BuildPath(string[] path){
+        return RecursiveBuild(path, 0, "");
+    }
+
+    private static string RecursiveBuild(string[] path, int i, string build){
+        if(path.Length == i) 
+            return build;
+        build += path[i] + Path.DirectorySeparatorChar;
+        return RecursiveBuild(path, i + 1, build);
+    }
 
     private GameObject renameItem(GameObject newItem, User user){
         newItem.name = newItem.name.Replace("item(Clone)", char.ToUpper(user.nameUser[0]) + user.nameUser.Substring(1)).Trim();
@@ -111,7 +117,6 @@ public class Spawnner : MonoBehaviour {
         chatsFutaba.Add( new Chat("Hey Joker, I saw your post. I’d love to feature it on my feed, would that be okay?", new DateTime(2021, 7, 31, 7, 21, 20)) );
         chatsFutaba.Add( new Chat("Monitor your top followers and send them a message.", new DateTime(2021, 7, 31, 7, 21, 20)) );
         chatsFutaba.Add( new Chat("As a reward for being one of our top followers", new DateTime(2021, 7, 31, 7, 21, 20)) );
-        
 
         List<Chat> chatsHifumi = new List<Chat>();
         chatsHifumi.Add( new Chat("Hello", new DateTime(2021, 7, 31, 6, 10, 20)) );
@@ -126,10 +131,8 @@ public class Spawnner : MonoBehaviour {
         chatsKawakami.Add( new Chat("Maid Service ?", new DateTime(2021, 7, 31, 7, 21, 20)) );
 
         List<Chat> chatsTest = new List<Chat>();
-        chatsTest.Add( new Chat("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", new DateTime(2020, 7, 31, 7, 10, 20)) );
-        chatsTest.Add( new Chat("Message Last Index", new DateTime(2021, 9, 29, 3, 10, 20)) );
-        
-        User asd = new User();
+        chatsTest.Add( new Chat("Hello??", new DateTime(2020, 7, 31, 7, 10, 20)) );
+        chatsTest.Add( new Chat("Last Message", new DateTime(2021, 9, 29, 3, 10, 20)) );
 
         List<User> users = new List<User>();
         User akechi = new User(1, "Akechi", iconPath + "akechi.png", Color.cyan, chatsAkechi);
@@ -145,7 +148,6 @@ public class Spawnner : MonoBehaviour {
 
         users.Add(akechi);
         users.Add(futaba);
-        users.Add(group);
         users.Add(hifumi);
         users.Add(kawakami);
         users.Add(makoto);
@@ -153,6 +155,8 @@ public class Spawnner : MonoBehaviour {
         users.Add(sojiro);
         users.Add(takemi);
         users.Add(yusuke);
+
+        users.Add(group);
 
         return users.ToArray();
     }

@@ -28,6 +28,7 @@ public class UserLayout : MonoBehaviour {
         lastMessageUser.text = lastIndexMsg.Length > 18 ? lastIndexMsg.Substring(0, 18) + "..." : lastIndexMsg;
 
         // message event
+        setupEventChat("");
         if(lastIndexMsg.Last() == '?'){
             setupEventChat("question_mark");
         }else if(lastIndexMsg.Last() == '!'){
@@ -35,6 +36,7 @@ public class UserLayout : MonoBehaviour {
         }
 
         // image user
+        //imgUser.overrideSprite =  Resources.Load<Sprite>(user.imgUser);
         imgUser.overrideSprite = AssetDatabase.LoadAssetAtPath(user.imgUser, typeof(Sprite)) as Sprite;
         imgUser.SetNativeSize();
 
@@ -64,8 +66,14 @@ public class UserLayout : MonoBehaviour {
     }
 
     private void setupEventChat(string eventName){
+        if(eventName == ""){
+            eventMessage.color = new Color (1, 1, 1, 0);
+            return;
+        }
+
         eventMessage.color = Color.white;
-        eventMessage.sprite = AssetDatabase.LoadAssetAtPath($"Assets/Persona 5 IM/{eventName}.png", typeof(Sprite)) as Sprite;
+        //eventMessage.sprite = Resources.Load<Sprite>($"Assets/Persona 5 IM/{eventName}.png");
+        eventMessage.sprite = AssetDatabase.LoadAssetAtPath($"Assets/Resources/Persona 5 IM/{eventName}.png", typeof(Sprite)) as Sprite;
     }
 #endregion
 }
